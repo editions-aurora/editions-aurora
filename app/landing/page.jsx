@@ -10,28 +10,26 @@ export default function LandingPage() {
   const [childId, setChildId] = useState(null);
 
   useEffect(() => {
-    // 1. Récupère childId depuis query string
+    // 1️⃣ Récupère childId depuis la query string
     const params = new URLSearchParams(window.location.search);
     const id = params.get("childId");
-    if (id) {
-      setChildId(id);
+    if (!id) return;
+    setChildId(id);
 
-      // 2. On écoute la table Supabase pour ce child_id
-      const subscription = supabase
-        .from(`uploads:child_id=eq.${id}`)
-        .on("UPDATE", payload => {
-          console.log("Update reçu :", payload);
-          if (payload.new.status === "done") {
-            router.replace(`/books/${id}`);
-          }
-        })
-        .subscribe();
+    // 2️⃣ Écoute les updates sur la table 'uploads' pour ce childId
+    const subscription = supabase
+      .from(`uploads:child_id=eq.${id}`)
+      .on("UPDATE", payload => {
+        if (payload.new.status === "done") {
+          router.replace(`/books/${id}`);
+        }
+      })
+      .subscribe();
 
-      // 3. Cleanup à la destruction du composant
-      return () => {
-        supabase.removeSubscription(subscription);
-      };
-    }
+    // 3️⃣ Cleanup à la destruction du composant
+    return () => {
+      supabase.removeSubscription(subscription);
+    };
   }, [router]);
 
   return (
@@ -40,14 +38,6 @@ export default function LandingPage() {
       <p>Glisse-dépose des photos de l’enfant pour démarrer.</p>
 
       <Dropzone />
-
-      <section style={{ marginTop: 32 }}>
-        <h2>Et ensuite ?</h2>
-        <ul>
-          <li>Les photos sont stockées dans Supabase Storage.</li>
-          <li>Le workflow N8N analyse et enrichit les données.</li>
-        </ul>
-      </section>
 
       {childId && (
         <div style={{ marginTop: 24 }}>
