@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Dropzone from "@/components/Dropzone";
 
 export default function LandingPage() {
   const router = useRouter();
+  const [childId, setChildId] = useState(null); // <-- nouveau state
 
   useEffect(() => {
-    // Récupère le childId depuis la query string
     const params = new URLSearchParams(window.location.search);
-    const childId = params.get("childId");
-    console.log("childId détecté :", childId);
-    // Si un childId est fourni, redirige automatiquement vers /books/[childId]
-    if (childId) {
-      router.replace(`/books/${childId}`);
+    const id = params.get("childId");
+    console.log("childId détecté :", id);
+    setChildId(id); // <-- on met à jour le state
+
+    if (id) {
+      router.replace(`/books/${id}`);
     }
   }, [router]);
 
@@ -33,14 +34,12 @@ export default function LandingPage() {
         </ul>
       </section>
 
-      {/*
-        Optionnel : message de redirection si childId est présent
-      */}
-      <div id="redirect-message" style={{ marginTop: 24 }}>
-        {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("childId")
-          ? "Redirection en cours vers la page personnalisée..."
-          : null}
-      </div>
+      {/* Message de redirection uniquement après hydratation */}
+      {childId && (
+        <div style={{ marginTop: 24 }}>
+          Redirection en cours vers la page personnalisée...
+        </div>
+      )}
     </main>
   );
 }
