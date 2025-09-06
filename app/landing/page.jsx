@@ -16,21 +16,28 @@ export default function LandingPage() {
 
     setChildId(id);
 
-    // ✅ Abonnement Supabase v2
+    // 🔹 Abonnement Supabase Realtime (v2)
     const channel = supabase
       .channel(`child_id-${id}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "uploads", filter: `child_id=eq.${id}` },
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "uploads",
+          filter: `childId=eq.${id}`
+        },
         (payload) => {
-          console.log("Update reçu :", payload);
-          if (payload.new.status === "done") {
+          console.log("Update reçu pour childId", id, ":", payload);
+          if (payload.new?.status === "done") {
+            console.log("Status done → redirection vers /books/" + id);
             router.replace(`/books/${id}`);
           }
         }
       )
       .subscribe();
 
+    // 🔹 Cleanup à la destruction du composant
     return () => {
       supabase.removeChannel(channel);
     };
@@ -43,17 +50,21 @@ export default function LandingPage() {
 
       <Dropzone />
 
-      <section style={{ marginTop: 32 }}>
-        <h2>Et ensuite ?</h2>
-        <ul>
-          <li>Les photos sont stockées dans Supabase Storage.</li>
-          <li>Le workflow N8N analyse et enrichit les données.</li>
-        </ul>
-      </section>
-
       {childId && (
         <div style={{ marginTop: 24 }}>
-          Redirection en cours vers la page personnalisée...
+          🔄 Écoute des updates Supabase pour {childId}...
+          <button
+            onClick={async () => {
+              const { data, error } = await supabase
+                .from("uploads")
+                .update({ status: "done" })
+                .eq("childId", childId);
+              console.log({ data, error });
+            }}
+            style={{ marginLeft: 16 }}
+          >
+            TEST update status
+          </button>
         </div>
       )}
     </main>
