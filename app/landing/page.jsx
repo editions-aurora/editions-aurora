@@ -24,7 +24,7 @@ export default function LandingPage() {
         {
           event: "UPDATE",
           schema: "public",
-          table: "uploads",
+          table: "children_photos",
           filter: `childId=eq.${id}`
         },
         (payload) => {
@@ -56,7 +56,7 @@ export default function LandingPage() {
           <button
             onClick={async () => {
               const { data, error } = await supabase
-                .from("uploads")
+                .from("children_photos")
                 .update({ status: "done" })
                 .eq("childId", childId);
               console.log({ data, error });
