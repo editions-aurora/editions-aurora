@@ -11,7 +11,7 @@ export default function LandingPage() {
     // Récupère le childId depuis la query string
     const params = new URLSearchParams(window.location.search);
     const childId = params.get("childId");
-
+    console.log("childId détecté :", childId);
     // Si un childId est fourni, redirige automatiquement vers /books/[childId]
     if (childId) {
       router.replace(`/books/${childId}`);
